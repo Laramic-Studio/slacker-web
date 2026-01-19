@@ -1,0 +1,105 @@
+export interface User {
+  id: string;
+  full_name: string;
+  email: string;
+  username: string;
+  last_login: string;
+  updated_at: string;
+  created_at: string;
+  organisation_id?: string;
+  email_verified_at?: string
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  code: number,
+  data: {
+    user: User;
+    token: string;
+    token_type: string;
+    expires_in?: number;
+    email_verified?: boolean;
+  };
+}
+
+export interface RegisterPayload {
+  full_name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  code: number,
+  data: {
+    user: User;
+    token: string;
+    token_type: string;
+    email_verified: boolean;
+  };
+}
+
+export interface OtpVerificationPayload {
+  otp: string;
+  email?: string;
+}
+
+export interface OtpVerificationResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    email_verified: boolean;
+  };
+}
+
+export interface PasswordResetOtpPayload {
+  email: string;
+}
+
+export interface PasswordResetOtpResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    expires_at?: string;
+    otp?: string; // Only in development
+  };
+}
+
+export interface PasswordResetVerifyPayload {
+  email: string;
+  otp: string;
+}
+
+export interface PasswordResetVerifyResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    verified: boolean;
+  };
+}
+
+export interface PasswordResetPayload {
+  email: string;
+  otp: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface PasswordResetResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  message?: string;
+  errors?: Record<string, string[]>;
+}
