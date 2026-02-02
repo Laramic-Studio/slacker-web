@@ -26,17 +26,17 @@ export const registerUser = async (payload: RegisterPayload): Promise<RegisterRe
 };
 
 export const verifyOtp = async (payload: OtpVerificationPayload): Promise<OtpVerificationResponse> => {
-  const response = await api.post('/email-verification/verify-otp', payload);
+  const response = await api.post('/auth/verify-email', payload);
   return response.data;
 };
 
 export const sendOtp = async (email: string) => {
-  const response = await api.post('/email-verification/send-otp', { email });
+  const response = await api.post('/auth/send-otp', { email });
   return response.data;
 };
 
-export const resendOtp = async (email?: string) => {
-  const response = await api.post('/email-verification/resend-otp', { email });
+export const resendOtp = async () => {
+  const response = await api.post('/auth/resend-otp');
   return response.data;
 };
 
@@ -46,7 +46,7 @@ export const logout = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const response = await api.get('/me');
+  const response = await api.get('/auth/me');
   return response.data;
 };
 

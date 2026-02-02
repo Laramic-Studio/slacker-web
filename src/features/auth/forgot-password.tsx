@@ -1,14 +1,15 @@
 import { Button, Input } from "@/components/ui";
 import { Label } from "@/components/ui/label";
 import { AuthLayout } from "@/layouts/auth/app";
-import { ArrowRight, Lock, Mail, ArrowLeft } from "lucide-react";
+import { ArrowRight,  ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
+import { InboxIcon } from '@heroicons/react/24/solid'
+
 
 const ForgotPasswordForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +40,15 @@ const ForgotPasswordForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
               <Input
                 id="email"
                 type="email"
-                placeholder="you@company.com"
+                placeholder="Email@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                leftIcon={ <InboxIcon className=" w-4 h-4" />}
                 required
               />
-            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

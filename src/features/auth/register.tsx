@@ -8,6 +8,7 @@ import { useRegisterUser } from "@/services/mutations/useAuth";
 import { getApiErrorMessage } from "@/utils";
 import { storeAuthData } from "@/lib/cookies";
 import { toast } from "sonner";
+import { InboxIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/solid'
 
 const RegisterForm = () => {
   const { mutateAsync: register, isPending } = useRegisterUser();
@@ -30,7 +31,7 @@ const RegisterForm = () => {
       if (data.success) {
         toast.success(data.message);
         storeAuthData(data.data.token, data.data.user);
-        navigate("/auth/verify-email", { replace: true });
+        navigate("/authenticate/verify-email", { replace: true });
       }
     } catch (error) {
       console.log(error);
@@ -66,50 +67,42 @@ const RegisterForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
               <Input
                 id="name"
                 type="text"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="pl-10"
                 required
+               leftIcon={ <UserIcon className=" w-4 h-4" />}
               />
-            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
-              <Input
+            <Input
                 id="email"
                 type="email"
                 placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+               leftIcon={ <InboxIcon className=" w-4 h-4" />}
                 required
               />
-            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
-              <Input
+           <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
+                leftIcon={ <LockClosedIcon className=" w-4 h-4" />}
                 required
               />
-            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>

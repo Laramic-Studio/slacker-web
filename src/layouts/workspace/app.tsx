@@ -65,6 +65,8 @@ export const WorkspaceLayout = ({  children, title, subtitle }: Props) => {
           </div>
         </div>
 
+       
+
         <p className="text-sidebar-text-muted text-sm">
           Trusted by 10,000+ teams worldwide
         </p>

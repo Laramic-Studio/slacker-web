@@ -86,3 +86,11 @@ export const getApiErrorMessage = (error: any): string => {
 export const isApiError = (error: unknown): error is { status: number; message: string } => {
   return typeof error === 'object' && error !== null && 'status' in error;
 };
+
+
+export const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };

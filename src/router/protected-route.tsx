@@ -5,32 +5,37 @@ const ProtectedRoute = () => {
   const { data: user, isLoading } = useUser();
   const location = useLocation();
 
-  if (isLoading) {
-    return null;
-  }
+  if (isLoading) return null;
 
-  // Redirect to home if not authenticated
+  // Not authenticated → login
   if (!user) {
-    return <Navigate to="/" replace={true} />;
+    return <Navigate to="/authenticate/login" replace />;
   }
 
-  // Check if email is verified, except on verification-related routes
-  const isVerificationRoute =
-    location.pathname.startsWith("/authenticate/verify-email") ||
-    location.pathname.startsWith("/authenticate/forgot-password") ||
-    location.pathname.startsWith("/authenticate/reset-password");
+  const verificationRoutes = [
+    "/authenticate/verify-email",
+    "/authenticate/forgot-password",
+    "/authenticate/reset-password",
+  ];
 
+  const isVerificationRoute = verificationRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  // Authenticated but not verified → force verify
   if (!user.email_verified_at && !isVerificationRoute) {
-    return <Navigate to="/auth/verify-email" replace={true} />;
+    return (
+      <Navigate
+        to="/authenticate/verify-email"
+        replace
+        state={{ from: location }}
+      />
+    );
   }
 
-  // If user is verified but on verification page, redirect to home
-  if (
-    user.email_verified_at &&
-    isVerificationRoute &&
-    location.pathname.startsWith("/authenticate/verify-email")
-  ) {
-    return <Navigate to="/" replace={true} />;
+  // Verified users should not see verification pages
+  if (user.email_verified_at && isVerificationRoute) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

@@ -6,6 +6,8 @@ import {
   CreateWorkspace,
   VerifyEmail,
   WorkspaceHome,
+  Landing,
+  InviteMembers,
 } from "@/pages";
 import { ErrorBoundaryFallback } from "../components/error-boundary-fallback";
 import { injectErrorBoundary } from "@/utils";
@@ -15,7 +17,7 @@ import ProtectedRoute from "./protected-route";
 const routesObject: RouteObject[] = [
   {
     path: "/",
-    element: <WorkspaceHome />,
+    element: <Landing />,
   },
   {
     path: "/authenticate",
@@ -37,19 +39,28 @@ const routesObject: RouteObject[] = [
         path: "reset-password",
         element: <GuestRoute />,
       },
+       {
+        path: "verify-email",
+        element: <VerifyEmail />,
+      },
     ],
   },
   {
     path: "/",
     element: <ProtectedRoute />,
     children: [
-      {
-        path: "auth/verify-email",
-        element: <VerifyEmail />,
-      },
+     
       {
         path: "workspace/create",
         element: <CreateWorkspace />,
+      },
+      {
+        path: "workspace/invite",
+        element: <InviteMembers />,
+      },
+      {
+        path: "workspace",
+        element: <WorkspaceHome />,
       },
     ],
   },

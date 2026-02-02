@@ -1,176 +1,244 @@
-import { useState } from 'react';
-import { Check, Users, Calendar, Shield, ArrowRight, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import type { Invitation, OnboardingUser } from '@/data/onboardingData';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { Mail, Plus, X, Copy, Check, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { WorkspaceLayout } from "@/layouts/workspace/app";
+import {  useNavigate } from "react-router";
+import { useInviteMembers } from "@/services/mutations/useWorkspace";
+import { toast } from "sonner";
+import { getApiErrorMessage } from "@/utils";
+import { useFetchWorkspace } from "@/services/queries/useWorkspace";
 
-interface InvitationStepProps {
-  user: OnboardingUser;
-  invitation: Invitation;
-  onAccept: () => void;
-  onDecline: () => void;
-}
+const InviteWorkspaceMembers = () => {
+  const navigate = useNavigate();
+  const { mutateAsync: InviteMembers, isPending } = useInviteMembers();
+  const [emails, setEmails] = useState<string[]>([]);
+  const [currentEmail, setCurrentEmail] = useState("");
+  const [copied, setCopied] = useState(false);
+  const { data: workspace, isLoading } = useFetchWorkspace();
 
-export const InvitationStep = ({ user, invitation, onAccept, onDecline }: InvitationStepProps) => {
-  const [isAccepting, setIsAccepting] = useState(false);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  const handleAccept = async () => {
-    setIsAccepting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    onAccept();
-  };
 
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Administrator';
-      case 'member': return 'Team Member';
-      case 'guest': return 'Guest';
-      default: return role;
+  const inviteLink = `https://teamspace.app/invite/${workspace?.data.workspace.slug}`;
+
+  const addEmail = () => {
+    const email = currentEmail.trim().toLowerCase();
+    if (email && email.includes("@") && !emails.includes(email)) {
+      setEmails([...emails, email]);
+      setCurrentEmail("");
     }
   };
 
-  const getRoleDescription = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Full access to all channels and workspace settings';
-      case 'member': return 'Access to public channels and assigned private channels';
-      case 'guest': return 'Limited access to specific channels only';
-      default: return '';
+  const removeEmail = (emailToRemove: string) => {
+    setEmails(emails.filter((e) => e !== emailToRemove));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addEmail();
+    }
+  };
+
+  const copyInviteLink = async () => {
+    await navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSendInvites = async () => {
+    try {
+      const data = await InviteMembers({ emails });
+
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(getApiErrorMessage(error));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 p-4">
-      <div className="w-full max-w-lg">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
-            <span className="text-2xl font-bold text-primary-foreground">T</span>
-          </div>
-        </div>
-
-        {/* Invitation card */}
-        <div className="bg-card rounded-2xl shadow-xl border overflow-hidden">
-          {/* Header with workspace branding */}
-          <div className="bg-sidebar p-8 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-sidebar-bg-active flex items-center justify-center mx-auto mb-4 text-4xl">
-              {invitation.workspaceLogo || '🏢'}
-            </div>
-            <h2 className="text-2xl font-bold text-sidebar-text-active mb-2">
-              {invitation.workspaceName}
-            </h2>
-            <p className="text-sidebar-text">
-              You've been invited to join this workspace
+    <WorkspaceLayout>
+      <div className="w-full max-w-xl">
+        <div>
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mb-2">Invite your team</h1>
+            <p className="text-muted-foreground">
+              Collaboration is better together. Add your teammates to{" "}
+              <span className="font-medium text-foreground">
+                {workspace?.data.workspace.name}
+              </span>
             </p>
           </div>
 
-          {/* Invitation details */}
-          <div className="p-8">
-            {/* Inviter info */}
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={invitation.inviterAvatar} />
-                <AvatarFallback>{invitation.inviterName[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Invited by</p>
-                <p className="font-semibold">{invitation.inviterName}</p>
-                <p className="text-sm text-muted-foreground">{invitation.inviterEmail}</p>
+          <div className="space-y-6">
+            {/* Email input */}
+            <div className="space-y-2">
+              <Label>Email addresses</Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type="email"
+                    placeholder="colleague@company.com"
+                    value={currentEmail}
+                    onChange={(e) => setCurrentEmail(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="pl-10"
+                    leftIcon={<Mail className="w-4 h-4 " />}
+                  />
+                </div>
+                <Button type="button" variant="outline" onClick={addEmail}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Press Enter or comma to add multiple emails
+              </p>
+            </div>
+
+            {/* Email tags */}
+            {emails.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {emails.map((email) => (
+                  <div
+                    key={email}
+                    className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
+                  >
+                    <span>{email}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeEmail(email)}
+                      className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Invite preview */}
+            {emails.length > 0 && (
+              <div className="bg-muted/50 rounded-lg p-4">
+                <p className="text-sm font-medium mb-3">Invitation preview</p>
+                <div className="bg-background rounded-lg border p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-xl">
+                      ⚠️
+                    </div>
+                    <div>
+                      <p className="font-semibold">
+                        {workspace?.data.workspace.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        teamspace.app/{workspace?.data.workspace.slug}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    You've been invited to join{" "}
+                    <span className="font-medium text-foreground">
+                      {workspace?.data.workspace.name}
+                    </span>{" "}
+                    on TeamSpace.
+                  </p>
+                  <div className="text-xs text-primary font-medium">
+                    Click to accept invitation →
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or share invite link
+                </span>
               </div>
             </div>
 
-            {/* Role and permissions */}
-            <div className="space-y-4 mb-8">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold">Your Role: {getRoleLabel(invitation.role)}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {getRoleDescription(invitation.role)}
-                  </p>
-                </div>
+            {/* Invite link */}
+            <div className="space-y-2">
+              <Label>Invite link</Label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={inviteLink}
+                  className="font-mono text-sm bg-muted/50"
+                />
+                <Button
+                  variant="outline"
+                  onClick={copyInviteLink}
+                  className={cn(
+                    "shrink-0 gap-2 transition-all",
+                    copied && "bg-green-50 border-green-200 text-green-700",
+                  )}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </>
+                  )}
+                </Button>
               </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold">Join the Team</p>
-                  <p className="text-sm text-muted-foreground">
-                    Connect with your team members instantly
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Calendar className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold">Invitation Expires</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(invitation.expiresAt, 'MMMM d, yyyy')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* User joining as */}
-            <div className="bg-muted/50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-muted-foreground mb-2">You're joining as</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-medium">
-                    {user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold">{user.name || 'New User'}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={onDecline}
-                disabled={isAccepting}
-              >
-                <X className="w-4 h-4 mr-2" />
-                Decline
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handleAccept}
-                disabled={isAccepting}
-              >
-                {isAccepting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    Joining...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4" />
-                    Accept & Join
-                  </span>
-                )}
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                Anyone with this link can join your workspace
+              </p>
             </div>
           </div>
-        </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Wrong account?{' '}
-          <button className="text-primary hover:underline">Sign in with a different account</button>
-        </p>
+          {/* Actions */}
+          <div className="flex gap-3 mt-8">
+            {emails.length === 0 ? (
+              <Button
+                variant="ghost"
+                className="flex-1"
+                // onClick={onSkip}
+              >
+                Skip for now
+              </Button>
+            ) : (
+              <Button
+                className="flex-1 gap-2"
+                onClick={handleSendInvites}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    Sending invites...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send {emails.length} invite{emails.length !== 1 ? "s" : ""}
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </WorkspaceLayout>
   );
 };
+
+export default InviteWorkspaceMembers;

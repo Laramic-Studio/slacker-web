@@ -4,10 +4,12 @@ import { AuthLayout } from "@/layouts/auth/app";
 import { storeAuthData } from "@/lib/cookies";
 import { useLoginUser } from "@/services/mutations/useAuth";
 import { getApiErrorMessage } from "@/utils";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { InboxIcon, LockClosedIcon } from '@heroicons/react/24/solid'
+
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ const LoginForm = () => {
         toast.success(data.message);
         storeAuthData(data.data.token, data.data.user);
         if (!data.data.user.email_verified_at) {
-          navigate("/auth/verify-email", { replace: true });
+          navigate("/authenticate/verify-email", { replace: true });
         }
         navigate("/", { replace: true });
       }
@@ -68,34 +70,28 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
               <Input
                 id="email"
                 type="email"
-                placeholder="you@company.com"
+                placeholder="Jonh@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
                 required
+                leftIcon={ <InboxIcon className=" w-4 h-4" />}
               />
-            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-100" />
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
                 required
+                 leftIcon={ <LockClosedIcon className=" w-4 h-4" />}
               />
-            </div>
           </div>
 
           <div className="text-right">

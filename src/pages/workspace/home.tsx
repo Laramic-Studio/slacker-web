@@ -1,7 +1,11 @@
+import { Link } from "react-router";
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <div>
+      Home
+      <Link to="/authenticate/login">Login</Link>
+    </div>
   )
 }
 

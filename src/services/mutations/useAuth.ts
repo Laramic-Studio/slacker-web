@@ -41,8 +41,7 @@ export const useRegisterUser = () => {
 export const useVerifyOtp = (): UseMutationResult<
   OtpVerificationResponse,
   AxiosError,
-  OtpVerificationPayload,
-  unknown
+  OtpVerificationPayload
 > => {
   return useMutation({
     mutationFn: verifyOtp,
@@ -57,7 +56,7 @@ export const useSendOtp = () => {
 
 export const useResendOtp = () => {
   return useMutation({
-    mutationFn: (email?: string) => resendOtp(email),
+    mutationFn: resendOtp
   });
 };
 

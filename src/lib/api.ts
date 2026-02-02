@@ -9,7 +9,6 @@ const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:8000/api/v1';
 const instance = axios.create({
   baseURL: baseUrl,
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });

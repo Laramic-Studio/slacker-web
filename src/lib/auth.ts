@@ -37,6 +37,7 @@ const userFn = async (): Promise<User | null> => {
   // Verify token is still valid by fetching current user
   try {
     const response = await getCurrentUser();
+    console.log(response)
     if (response.success && response.data?.user) {
       const updatedUser = response.data.user;
       setSession({ ...updatedUser });
@@ -45,6 +46,7 @@ const userFn = async (): Promise<User | null> => {
     return null;
   } catch (error) {
     // Token invalid, clear storage
+    console.log(error)
     removeWithoutRedirect();
     return null;
   }

@@ -1,3 +1,4 @@
+import { Work } from '@/layouts/workspace/app';
 export interface User {
   id: string;
   full_name: string;
@@ -49,7 +50,6 @@ export interface RegisterResponse {
 
 export interface OtpVerificationPayload {
   otp: string;
-  email?: string;
 }
 
 export interface OtpVerificationResponse {
@@ -102,4 +102,129 @@ export interface ApiErrorResponse {
   success: false;
   message?: string;
   errors?: Record<string, string[]>;
+}
+
+
+interface Workspace {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  visibility: string;
+  logo: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateWorkspacePayload {
+  name: string;
+  description?: string;
+  visibility: string;
+  logo?: File;
+}
+
+export interface CreateWorkspaceResponse {
+  success: boolean;
+  message: string;
+  code: number,
+  data: {
+    workspace: Workspace;
+  };
+}
+
+export interface InviteMemberPayload {
+  emails: string[];
+}
+
+export interface InviteMemberResponse {
+  success: boolean;
+  message: string;
+  code: number,
+  data: {
+    workspace: Workspace;
+  };
+}
+
+export interface getWorkspaceResponse {
+  success: boolean;
+  message: string;
+  code: number,
+  data: {
+    workspace: Workspace;
+  };
+}
+
+/********************************************
+ *                  WORKSPACE API                     *
+**********************************************/
+
+
+export type WorkspaceRole = 'owner' | 'admin' | 'member' | 'guest';
+export type WorkspaceVisibility = 'public' | 'private' | 'invite-only';
+
+export interface User {
+  id: string;
+  name: string;
+  displayName: string;
+  avatar: string;
+  status: 'online' | 'away' | 'busy' | 'offline';
+  role: string;
+  email: string;
+}
+
+export interface WorkspaceMember {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  workspaceRole: WorkspaceRole;
+  joinedAt: Date;
+  invitedBy?: string;
+}
+
+export interface WorkspaceSettings {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  visibility: WorkspaceVisibility;
+  allowGuestAccess: boolean;
+  defaultChannelId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  userId: string;
+  channelId: string;
+  timestamp: Date;
+  reactions?: { emoji: string; count: number; users: string[] }[];
+  threadCount?: number;
+  isEdited?: boolean;
+}
+
+export interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  isPrivate: boolean;
+  projectId: string;
+  unreadCount?: number;
+  lastMessage?: string;
+}
+
+export interface DirectMessage {
+  id: string;
+  participants: string[];
+  unreadCount?: number;
+  lastMessage?: string;
+  lastMessageTime?: Date;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
 }
